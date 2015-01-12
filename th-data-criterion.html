@@ -72,13 +72,19 @@ A Thelma component providing solution to no problem in particular.
         }
       },
       _calculateOutput: function() {
+
+        var self = this;
+
+        //don't calculate anything if it is just included in another component
         if(this.included) {
           return;
         }
         if(self.whereColumn && self.whereColumn!=='none' && self.whereClause && self.whereClause.length>0) {
-          tmp = _.filter(tmp,function(element) {
+          self.output = _.filter(self.input,function(element) {
             return element[self.whereColumn]===self.whereClause;
           })
+
+          //this.output = tmp;
         }
 
 
@@ -117,9 +123,12 @@ A Thelma component providing solution to no problem in particular.
       whereColumnChanged: function() {
         this._updateWhereClauses();
       },
+      whereClauseChanged: function() {
+        this._calculateOutput(); 
+      },
       showControls: function(e) {
         this.$.ctrl_collapse.toggle();
-      },
+      }
 
 
     });
