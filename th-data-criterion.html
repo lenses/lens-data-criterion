@@ -37,12 +37,10 @@ A Thelma component providing solution to no problem in particular.
             </core-selector>
             <label for="where_ops_selector">where operator:</label>
             <core-selector id="where_ops_selector" selected="{{whereOperator}}" valueattr="label">
-                  <div class="col" label="eq">Equal</div>
-                  <!--
+                  <div class="col" label="eq">Equal</div>                 
                   <div class="col" label="ne">Not Equal</div>
                   <div class="col" label="gt">Greater than</div>
-                  <div class="col" label="st">Smaller than</div>
-                  -->
+                  <div class="col" label="st">Smaller than</div>                 
             </core-selector>
             <label for="where_ops_selector">criteria:</label>
             <core-selector id="value_selector" selected="{{whereClause}}" valueattr="label">
@@ -82,9 +80,26 @@ A Thelma component providing solution to no problem in particular.
           return;
         }
         if(self.whereColumn && self.whereColumn!=='none' && self.whereClause && self.whereClause.length>0) {
-          self.output = _.filter(self.input,function(element) {
-            return element[self.whereColumn]===self.whereClause;
-          })
+          if (self.whereOperator == 'eq') {
+            self.output = _.filter(self.input,function(element) {
+              return element[self.whereColumn]===self.whereClause;
+            })
+          }
+          else if (self.whereOperator == 'ne') {
+            self.output = _.filter(self.input,function(element) {
+              return element[self.whereColumn]!==self.whereClause;
+            })
+          }
+          else if (self.whereOperator == 'gt') {
+            self.output = _.filter(self.input,function(element) {
+              return element[self.whereColumn] > self.whereClause;
+            })
+          }
+          else if (self.whereOperator == 'st') {
+            self.output = _.filter(self.input,function(element) {
+              return element[self.whereColumn] < self.whereClause;
+            })
+          }
 
           //this.output = tmp;
         }
