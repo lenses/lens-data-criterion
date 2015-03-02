@@ -94,6 +94,9 @@ A Thelma component providing solution to no problem in particular.
       inputChanged: function() {
 
           var self = this;
+          if(!self.input || self.input.length == 0) {
+            return;
+          }
           var firstItem = self.input[0];
           if(!firstItem) {
             return;
