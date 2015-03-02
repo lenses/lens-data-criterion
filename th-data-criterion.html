@@ -82,12 +82,12 @@ A Thelma component providing solution to no problem in particular.
         if(self.whereColumn && self.whereColumn!=='none' && self.whereClause && self.whereClause.length>0) {
           if (self.whereOperator == 'eq') {
             self.output = _.filter(self.input,function(element) {
-              return element[self.whereColumn]===self.whereClause;
+              return element[self.whereColumn] == self.whereClause;
             })
           }
           else if (self.whereOperator == 'ne') {
             self.output = _.filter(self.input,function(element) {
-              return element[self.whereColumn]!==self.whereClause;
+              return element[self.whereColumn] != self.whereClause;
             })
           }
           else if (self.whereOperator == 'gt') {
