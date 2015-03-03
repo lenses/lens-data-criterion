@@ -28,27 +28,27 @@ A Thelma component providing solution to no problem in particular.
     <core-collapse id="ctrl_collapse">      
 
             <p class="info">Apply a filter on another column to narrow down the results.</p>
-            <label for="func_selector">Filter on column:</label>
+            <label for="func_selector">When:</label>
             <core-selector id="value_selector" selected="{{whereColumn}}" valueattr="label">
-                <div class="col" label="none">None</div>
+                <div class="col" label="none">-- no filter --</div>
               <template repeat="{{attr in _dataAttributes}}">
                 <div class="col" label="{{attr}}">{{attr}}</div>
               </template>
             </core-selector>
-            <label for="where_ops_selector">where operator:</label>
+            <label for="where_ops_selector">Is:</label>
             <core-selector id="where_ops_selector" selected="{{whereOperator}}" valueattr="label">
                   <div class="col" label="eq">Equal</div>                 
                   <div class="col" label="ne">Not Equal</div>
                   <div class="col" label="gt">Greater than</div>
                   <div class="col" label="st">Smaller than</div>                 
             </core-selector>
-            <label for="where_ops_selector">criteria:</label>
+            <label for="where_ops_selector">To: (select from values below)</label>
             <core-selector id="value_selector" selected="{{whereClause}}" valueattr="label">
               <template repeat="{{option in whereOptions}}">
-                <div class="col" label="{{option.value}}">{{option.value}}-{{option.count}}</div>
+                <div class="col" label="{{option.value}}">{{option.value}} ({{option.count}})</div>
               </template>
             </core-selector>
-            or
+            <label for="where_ops_selector">or type in the value:</label>
             <input is="core-input" value="{{whereClause}}" placeHolder="(e.g. blank or  New York)"></input>
       </core-collapse>
 
@@ -131,6 +131,9 @@ A Thelma component providing solution to no problem in particular.
       },      
       _updateWhereClauses: function() {
         var self = this;
+        if(!self.whereColumn || self.whereColumn=='none') {
+          return;
+        }
         self.whereOptions = _.chain(self.input)
                 .countBy(function(item) { return item[self.whereColumn]; } )
                 .map(function(value, key) { return {'value': key, 'count': value} })
@@ -144,6 +147,9 @@ A Thelma component providing solution to no problem in particular.
         this._updateWhereClauses();
       },
       whereClauseChanged: function() {
+        this._calculateOutput(); 
+      },
+      whereOperatorChanged: function() {
         this._calculateOutput(); 
       },
       showControls: function(e) {
