@@ -9,17 +9,17 @@ A Thelma component providing solution to no problem in particular.
 
 ##### Example
 
-    <th-data-criterion></th-data-criterion>
+    <lens-data-filter></lens-data-filter>
 
-@element th-data-criterion
+@element lens-data-filter
 @blurb Element providing solution to no problem in particular.
 @status alpha
-@homepage http://sepans.github.io/th-data-criterion
+@homepage http://sepans.github.io/lens-data-filter
 -->
 
-<polymer-element name="th-data-criterion" attributes="input output included whereOperator whereClause whereColumn">
+<polymer-element name="lens-data-filter" attributes="input output included whereOperator whereClause whereColumn">
   <template>
-    <link rel="stylesheet" href="th-data-criterion.css">
+    <link rel="stylesheet" href="lens-data-filter.css">
 
     <template if="{{!included}}">
       <core-icon-button icon="perm-data-setting" on-click="{{showControls}}"></core-icon-button>

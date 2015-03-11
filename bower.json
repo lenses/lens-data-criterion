@@ -1,8 +1,8 @@
 {
-  "name": "th-data-criterion",
+  "name": "lens-data-filter",
   "version": "0.0.0",
-  "keywords": "thelma, polymer, web-components",
-  "main": "th-data-criterion.html",
+  "keywords": "lenses, polymer, web-components",
+  "main": "lens-data-filter.html",
   "dependencies": {
     "th-theme": "thelmanews/th-theme",
     "polymer": "Polymer/polymer#~0.5.1",
