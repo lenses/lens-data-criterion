@@ -1,57 +1,50 @@
 <link rel="import" href="../polymer/polymer.html"> 
 <link rel="import" href="../core-selector/core-selector.html">
-<link rel="import" href="../core-collapse/core-collapse.html">
 <link rel="import" href="../core-input/core-input.html">
-<link rel="import" href="../core-icon-button/core-icon-button.html">
 
 <!--
-A Thelma component providing solution to no problem in particular.
+A data component for filtering output.
 
 ##### Example
 
     <lens-data-filter></lens-data-filter>
 
 @element lens-data-filter
-@blurb Element providing solution to no problem in particular.
+@blurb A data component for filtering output.
 @status alpha
-@homepage http://sepans.github.io/lens-data-filter
+@homepage http://lenses.github.io/lens-data-filter
 -->
 
 <polymer-element name="lens-data-filter" attributes="input output included whereOperator whereClause whereColumn">
   <template>
     <link rel="stylesheet" href="lens-data-filter.css">
 
-    <template if="{{!included}}">
-      <core-icon-button icon="perm-data-setting" on-click="{{showControls}}"></core-icon-button>
-    </template>
-
-    <core-collapse id="ctrl_collapse">      
-
-            <p class="info">Apply a filter on another column to narrow down the results.</p>
-            <label for="func_selector">When:</label>
-            <core-selector id="value_selector" selected="{{whereColumn}}" valueattr="label">
-                <div class="col" label="none">-- no filter --</div>
-              <template repeat="{{attr in _dataAttributes}}">
-                <div class="col" label="{{attr}}">{{attr}}</div>
-              </template>
-            </core-selector>
-            <label for="where_ops_selector">Is:</label>
-            <core-selector id="where_ops_selector" selected="{{whereOperator}}" valueattr="label">
-                  <div class="col" label="eq">Equal</div>                 
-                  <div class="col" label="ne">Not Equal</div>
-                  <div class="col" label="gt">Greater than</div>
-                  <div class="col" label="st">Smaller than</div>                 
-            </core-selector>
-            <label for="where_ops_selector">To: (select from values below)</label>
-            <core-selector id="value_selector" selected="{{whereClause}}" valueattr="label">
-              <template repeat="{{option in whereOptions}}">
-                <div class="col" label="{{option.value}}">{{option.value}} ({{option.count}})</div>
-              </template>
-            </core-selector>
-            <label for="where_ops_selector">or type in the value:</label>
-            <input is="core-input" value="{{whereClause}}" placeHolder="(e.g. blank or  New York)"></input>
-      </core-collapse>
-
+      <div class="lens-container lens-data">
+        <p class="info">Apply a filter on another column to narrow down the results.</p>
+        <label for="func_selector">When:</label>
+        <core-selector id="value_selector" selected="{{whereColumn}}" valueattr="label">
+            <div class="col" label="none">-- no filter --</div>
+          <template repeat="{{attr in _dataAttributes}}">
+            <div class="col" label="{{attr}}">{{attr}}</div>
+          </template>
+        </core-selector>
+        <label for="where_ops_selector">Is:</label>
+        <core-selector id="where_ops_selector" selected="{{whereOperator}}" valueattr="label">
+              <div class="col" label="eq">Equal</div>
+              <div class="col" label="ne">Not Equal</div>
+              <div class="col" label="gt">Greater than</div>
+              <div class="col" label="st">Smaller than</div>
+              <div class="col" label="ct">Contains</div>
+        </core-selector>
+        <label for="where_ops_selector">To: (select from values below)</label>
+        <core-selector id="value_selector" selected="{{whereClause}}" valueattr="label">
+          <template repeat="{{option in whereOptions}}">
+            <div class="col" label="{{option.value}}">{{option.value}} ({{option.count}})</div>
+          </template>
+        </core-selector>
+        <label for="where_ops_selector">or type in the value:</label>
+        <input is="core-input" value="{{whereClause}}" placeHolder="(e.g. blank or  New York)"></input>
+      </div> <!-- end container -->
 
   </template>
 
@@ -59,26 +52,14 @@ A Thelma component providing solution to no problem in particular.
 
   <script>
     Polymer({
-      /**
-       * Included: true makes the component to be just UI. To be used in other components like th-chart-data-filter
-       * @type {Boolean}
-       */
-      included: false,
+
       ready: function () {
-        //open the collapse if it the component is included
-        if(this.included && !this.$.ctrl_collapse.opened) {
-          this.$.ctrl_collapse.toggle();
-        }
         this.inputChanged();
       },
       _calculateOutput: function() {
 
         var self = this;
 
-        //don't calculate anything if it is just included in another component
-        if(this.included) {
-          return;
-        }
         if(self.whereColumn && self.whereColumn!=='none' && self.whereClause && self.whereClause.length>0) {
           if (self.whereOperator == 'eq') {
             self.output = _.filter(self.input,function(element) {
@@ -100,7 +81,11 @@ A Thelma component providing solution to no problem in particular.
               return element[self.whereColumn] < self.whereClause;
             })
           }
-
+          else if (self.whereOperator == 'ct') {
+              self.output = _.filter(self.input,function(element) {
+                return element[self.whereColumn].indexOf(self.whereClause) >= 0;
+              })
+            }
           //this.output = tmp;
         }
 
@@ -128,7 +113,7 @@ A Thelma component providing solution to no problem in particular.
           self._calculateOutput();
 
 
-      },      
+      },
       _updateWhereClauses: function() {
         var self = this;
         if(!self.whereColumn || self.whereColumn=='none') {
@@ -151,11 +136,7 @@ A Thelma component providing solution to no problem in particular.
       },
       whereOperatorChanged: function() {
         this._calculateOutput(); 
-      },
-      showControls: function(e) {
-        this.$.ctrl_collapse.toggle();
       }
-
 
     });
   </script>
