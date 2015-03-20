@@ -15,7 +15,7 @@ A data component for filtering output.
 @homepage http://lenses.github.io/lens-data-filter
 -->
 
-<polymer-element name="lens-data-filter" attributes="input output included whereOperator whereClause whereColumn">
+<polymer-element name="lens-data-filter" attributes="input output whereOperator whereClause whereColumn">
   <template>
     <link rel="stylesheet" href="lens-data-filter.css">
 
@@ -53,6 +53,33 @@ A data component for filtering output.
   <script>
     Polymer({
 
+      /**
+       * Input data
+       *
+       * @property input
+       * @type Array
+       * @default null
+       */
+      input: null,
+      /**
+       * Output data
+       *
+       * @property output
+       * @type Array
+       * @default null
+       */
+      output: null,
+
+      /**
+       *  [whereColumn description]
+       *  @type {String}
+       */
+      whereColumn: '',
+
+      whereClause: '',
+
+      whereOperator: '',
+
       ready: function () {
         this.inputChanged();
       },
@@ -86,7 +113,10 @@ A data component for filtering output.
                 return element[self.whereColumn].indexOf(self.whereClause) >= 0;
               })
             }
-          //this.output = tmp;
+        }
+        // if no filter, return unfiltered output
+        else {
+          self.output = self.input;
         }
 
 
