@@ -1,6 +1,7 @@
 <link rel="import" href="../polymer/polymer.html"> 
 <link rel="import" href="../core-selector/core-selector.html">
 <link rel="import" href="../core-input/core-input.html">
+<link rel="import" href="../lens-u-data-utility/lens-u-data-utility.html">
 
 <!--
 A data component for filtering output.
@@ -71,14 +72,38 @@ A data component for filtering output.
       output: null,
 
       /**
-       *  [whereColumn description]
-       *  @type {String}
+       *  Name of the column to filter-by.
+       *  
+       *  @property whereColumn
+       *  @type String
+       *  @default ''
        */
       whereColumn: '',
 
+      /**
+       *  Operator to apply to the column. Options are:
+       *
+       *  - "eq" - Equal
+       *  - "ne" - Not Equal
+       *  - "gt" - Greater than
+       *  - "st" - Smaller than
+       *  - "ct" - Contians
+       *  
+       *  @property whereOperator
+       *  @type String
+       */
+      whereOperator: '',
+
+      /**
+       *  Clause to apply to the whereOperator.
+       *  Can be a String, Object or Number.
+       *
+       *  @property whereClause
+       *  @type Object
+       */
       whereClause: '',
 
-      whereOperator: '',
+      dataUtil: document.createElement('lens-u-data-utility'),
 
       ready: function () {
         this.inputChanged();
@@ -87,33 +112,76 @@ A data component for filtering output.
 
         var self = this;
 
-        if(self.whereColumn && self.whereColumn!=='none' && self.whereClause && self.whereClause.length>0) {
-          if (self.whereOperator == 'eq') {
-            self.output = _.filter(self.input,function(element) {
-              return element[self.whereColumn] == self.whereClause;
-            })
+        var inputCopy = self.input;
+        var clauseCopy = self.whereClause;
+        var isDate = false;
+
+        // if column title has the word "date" in it, assume we're dealing with dates
+        if (self.whereColumn.toLowerCase().indexOf('date') > -1) {
+          isDate = true;
+          for (var i in inputCopy) {
+            inputCopy[i][self.whereColumn] = self.dataUtil.parseDate( inputCopy[i][self.whereColumn] );// = inputCopy
+            console.log(inputCopy[i][self.whereColumn] );
           }
-          else if (self.whereOperator == 'ne') {
-            self.output = _.filter(self.input,function(element) {
-              return element[self.whereColumn] != self.whereClause;
-            })
-          }
-          else if (self.whereOperator == 'gt') {
-            self.output = _.filter(self.input,function(element) {
-              return element[self.whereColumn] > self.whereClause;
-            })
-          }
-          else if (self.whereOperator == 'st') {
-            self.output = _.filter(self.input,function(element) {
-              return element[self.whereColumn] < self.whereClause;
-            })
-          }
-          else if (self.whereOperator == 'ct') {
-              self.output = _.filter(self.input,function(element) {
-                return element[self.whereColumn].indexOf(self.whereClause) >= 0;
-              })
-            }
+          console.log(clauseCopy);
+          clauseCopy = self.dataUtil.parseDate(clauseCopy);
+          console.log(clauseCopy);
         }
+
+        // if numeric, convert inputCopy and clauseCopy to numeric values.
+        else if (self.dataUtil.isColumnNumeric(self.input, self.whereColumn)) {
+          for (var i in inputCopy) {
+            inputCopy[i][self.whereColumn] = self.dataUtil.unformatStringIfNumeric( inputCopy[i][self.whereColumn] );// = inputCopy
+          }
+          clauseCopy = self.dataUtil.unformatStringIfNumeric(clauseCopy);
+        }
+
+        if(self.whereColumn && self.whereColumn!=='none' && self.whereClause && self.whereClause.length>0) {
+
+          switch(self.whereOperator) {
+            case 'eq':
+              self.output = _.filter(inputCopy,function(element) {
+                if (isDate) {
+                  return moment(element[self.whereColumn]).isSame(clauseCopy);
+                } else {
+                  return element[self.whereColumn] == clauseCopy;
+                }
+              });
+              break;
+            case 'ne':
+              self.output = _.filter(inputCopy,function(element) {
+                if (isDate) {
+                  return !moment(element[self.whereColumn]).isSame(clauseCopy);
+                } else {
+                  return element[self.whereColumn] != clauseCopy;
+                }
+              });
+              break;
+            case 'gt':
+              self.output = _.filter(inputCopy,function(element) {
+                if (isDate) {
+                  return moment(element[self.whereColumn]).isAfter(clauseCopy);
+                } else {
+                  return element[self.whereColumn] > clauseCopy;
+                }
+              });
+              break;
+            case 'st':
+              self.output = _.filter(inputCopy,function(element) {
+                if (isDate) {
+                  return moment(element[self.whereColumn]).isBefore(clauseCopy);
+                } else {
+                  return element[self.whereColumn] < clauseCopy;
+                }
+              });
+              break;
+            case 'ct':
+              self.output = _.filter(self.input,function(element) {
+                return (element[self.whereColumn].toString()).indexOf(self.whereClause.toString()) >= 0;
+              });
+          }
+        }
+
         // if no filter, return unfiltered output
         else {
           self.output = self.input;
