@@ -4,7 +4,8 @@
 <link rel="import" href="../lens-u-data-utility/lens-u-data-utility.html">
 
 <!--
-A data component for filtering output.
+A data component for filtering output. Can filter by dates and numeric values
+(i.e. "greater than") or a plain text search i.e. "contains".
 
 ##### Example
 
@@ -112,7 +113,7 @@ A data component for filtering output.
 
         var self = this;
 
-        var inputCopy = self.input;
+        var inputCopy =  JSON.parse(JSON.stringify(self.input));
         var clauseCopy = self.whereClause;
         var isDate = false;
 
@@ -121,15 +122,13 @@ A data component for filtering output.
           isDate = true;
           for (var i in inputCopy) {
             inputCopy[i][self.whereColumn] = self.dataUtil.parseDate( inputCopy[i][self.whereColumn] );// = inputCopy
-            console.log(inputCopy[i][self.whereColumn] );
           }
-          console.log(clauseCopy);
           clauseCopy = self.dataUtil.parseDate(clauseCopy);
-          console.log(clauseCopy);
         }
 
         // if numeric, convert inputCopy and clauseCopy to numeric values.
-        else if (self.dataUtil.isColumnNumeric(self.input, self.whereColumn)) {
+        else if (self.dataUtil.isColumnNumeric(inputCopy, self.whereColumn)) {
+
           for (var i in inputCopy) {
             inputCopy[i][self.whereColumn] = self.dataUtil.unformatStringIfNumeric( inputCopy[i][self.whereColumn] );// = inputCopy
           }
@@ -137,47 +136,52 @@ A data component for filtering output.
         }
 
         if(self.whereColumn && self.whereColumn!=='none' && self.whereClause && self.whereClause.length>0) {
-
+          var i = -1, col = self.whereColumn;
           switch(self.whereOperator) {
             case 'eq':
               self.output = _.filter(inputCopy,function(element) {
+                i++;
                 if (isDate) {
-                  return moment(element[self.whereColumn]).isSame(clauseCopy);
+                  return moment(element[col]).isSame(clauseCopy) ? element[col] = self.input[i][col] : false;
                 } else {
-                  return element[self.whereColumn] == clauseCopy;
+                  return element[col] == clauseCopy ? element[col] = self.input[i][col] : false;
                 }
               });
               break;
             case 'ne':
               self.output = _.filter(inputCopy,function(element) {
+                i++
                 if (isDate) {
-                  return !moment(element[self.whereColumn]).isSame(clauseCopy);
+                  return !moment(element[col]).isSame(clauseCopy) ? element[col] = self.input[i][col] : false;
                 } else {
-                  return element[self.whereColumn] != clauseCopy;
+                  return element[col] != clauseCopy ? element[col] = self.input[i][col] : false;
                 }
               });
               break;
             case 'gt':
               self.output = _.filter(inputCopy,function(element) {
+                i++
                 if (isDate) {
-                  return moment(element[self.whereColumn]).isAfter(clauseCopy);
+                  return moment(element[col]).isAfter(clauseCopy) ? element[col] = self.input[i][col] : false;;
                 } else {
-                  return element[self.whereColumn] > clauseCopy;
+                  return element[col] > clauseCopy ? element[col] = self.input[i][col] : false;
                 }
               });
               break;
             case 'st':
               self.output = _.filter(inputCopy,function(element) {
+                i++;
                 if (isDate) {
-                  return moment(element[self.whereColumn]).isBefore(clauseCopy);
+                  return moment(element[col]).isBefore(clauseCopy) ? element[col] = self.input[i][col] : false;;
                 } else {
-                  return element[self.whereColumn] < clauseCopy;
+                  return element[col] < clauseCopy ? element[col] = self.input[i][col] : false;;
                 }
               });
               break;
             case 'ct':
-              self.output = _.filter(self.input,function(element) {
-                return (element[self.whereColumn].toString()).indexOf(self.whereClause.toString()) >= 0;
+              self.output = _.filter(self.input,function(element, index) {
+                i++;
+                return (element[col].toString()).indexOf(self.whereClause.toString()) >= 0;
               });
           }
         }
@@ -214,6 +218,7 @@ A data component for filtering output.
       },
       _updateWhereClauses: function() {
         var self = this;
+
         if(!self.whereColumn || self.whereColumn=='none') {
           return;
         }
