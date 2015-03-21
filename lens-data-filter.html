@@ -123,7 +123,7 @@ A data component for filtering output. Can filter by dates and numeric values
           for (var i in inputCopy) {
             inputCopy[i][self.whereColumn] = self.dataUtil.parseDate( inputCopy[i][self.whereColumn] );// = inputCopy
           }
-          clauseCopy = self.dataUtil.parseDate(clauseCopy);
+          clauseCopy = self.dataUtil.parseDate( String(clauseCopy) );
         }
 
         // if numeric, convert inputCopy and clauseCopy to numeric values.
